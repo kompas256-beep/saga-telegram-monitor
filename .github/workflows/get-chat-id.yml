@@ -1,0 +1,31 @@
+name: Get Telegram Chat ID
+
+on:
+  workflow_dispatch:
+
+jobs:
+  get-chat-id:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Telegram updates
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          python - <<'PY'
+          import os
+          import requests
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+
+          data = requests.get(
+              f"https://api.telegram.org/bot{token}/getUpdates",
+              timeout=30
+          ).json()
+
+          for update in data.get("result", []):
+              message = update.get("message", {})
+              chat = message.get("chat", {})
+              if chat.get("id"):
+                  print("CHAT_ID =", chat["id"])
+          PY
