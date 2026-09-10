@@ -50,19 +50,23 @@ def get_listings():
 
     response.raise_for_status()
 
-    data = response.json()
+    payload = response.json()
 
-    if isinstance(data, list):
-        return data
+    # API возвращает данные внутри "data"
+    if isinstance(payload, dict) and isinstance(payload.get("data"), dict):
+        payload = payload["data"]
 
-    for key in ("results", "listings", "data", "items"):
-        if isinstance(data.get(key), list):
-            return data[key]
+    if isinstance(payload, dict):
+        for key in ("listings", "results", "items"):
+            if isinstance(payload.get(key), list):
+                return payload[key]
+
+    if isinstance(payload, list):
+        return payload
 
     raise RuntimeError(
-        f"Неизвестный формат ответа API: {data}"
+        f"Неизвестный формат ответа API: {response.json()}"
     )
-
 
 def number(value):
     if value is None:
